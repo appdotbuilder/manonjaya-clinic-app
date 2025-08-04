@@ -83,3 +83,58 @@ export const getSalesTransactionsInputSchema = z.object({
 });
 
 export type GetSalesTransactionsInput = z.infer<typeof getSalesTransactionsInputSchema>;
+
+// POS Transaction schemas
+export const transactionSchema = z.object({
+  id: z.number(),
+  total_harga: z.number(),
+  metode_pembayaran: z.string(),
+  tanggal: z.coerce.date()
+});
+
+export type Transaction = z.infer<typeof transactionSchema>;
+
+export const transactionItemSchema = z.object({
+  id: z.number(),
+  transaction_id: z.number(),
+  nama_item: z.string(),
+  harga: z.number(),
+  jumlah: z.number().int(),
+  subtotal: z.number()
+});
+
+export type TransactionItem = z.infer<typeof transactionItemSchema>;
+
+// Input schema for creating POS transactions
+export const createTransactionInputSchema = z.object({
+  metode_pembayaran: z.string().min(1, "Payment method is required"),
+  items: z.array(z.object({
+    nama_item: z.string().min(1, "Item name is required"),
+    harga: z.number().positive("Price must be positive"),
+    jumlah: z.number().int().positive("Quantity must be a positive integer")
+    // subtotal will be calculated automatically (harga * jumlah)
+  })).min(1, "At least one item is required")
+  // total_harga will be calculated from items
+});
+
+export type CreateTransactionInput = z.infer<typeof createTransactionInputSchema>;
+
+// Complete transaction with items for display
+export const transactionWithItemsSchema = z.object({
+  id: z.number(),
+  total_harga: z.number(),
+  metode_pembayaran: z.string(),
+  tanggal: z.coerce.date(),
+  items: z.array(transactionItemSchema)
+});
+
+export type TransactionWithItems = z.infer<typeof transactionWithItemsSchema>;
+
+// Query parameters for filtering POS transactions
+export const getTransactionsInputSchema = z.object({
+  date_from: z.string().optional(),
+  date_to: z.string().optional(),
+  metode_pembayaran: z.string().optional()
+});
+
+export type GetTransactionsInput = z.infer<typeof getTransactionsInputSchema>;

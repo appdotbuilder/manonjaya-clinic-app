@@ -13,7 +13,9 @@ import {
   updatePatientInputSchema,
   updateSalesTransactionInputSchema,
   getPatientsInputSchema,
-  getSalesTransactionsInputSchema
+  getSalesTransactionsInputSchema,
+  createTransactionInputSchema,
+  getTransactionsInputSchema
 } from './schema';
 
 // Import handlers
@@ -26,6 +28,9 @@ import { getSalesTransactions } from './handlers/get_sales_transactions';
 import { updateSalesTransaction } from './handlers/update_sales_transaction';
 import { deleteSalesTransaction } from './handlers/delete_sales_transaction';
 import { getDashboardStats } from './handlers/get_dashboard_stats';
+import { createTransaction } from './handlers/create_transaction';
+import { getTransactions } from './handlers/get_transactions';
+import { getTransactionById } from './handlers/get_transaction_by_id';
 
 const t = initTRPC.create({
   transformer: superjson,
@@ -77,6 +82,19 @@ const appRouter = router({
   // Dashboard statistics
   getDashboardStats: publicProcedure
     .query(() => getDashboardStats()),
+
+  // POS Transaction management routes
+  createTransaction: publicProcedure
+    .input(createTransactionInputSchema)
+    .mutation(({ input }) => createTransaction(input)),
+  
+  getTransactions: publicProcedure
+    .input(getTransactionsInputSchema.optional())
+    .query(({ input }) => getTransactions(input || {})),
+  
+  getTransactionById: publicProcedure
+    .input(z.object({ id: z.number() }))
+    .query(({ input }) => getTransactionById(input.id)),
 });
 
 export type AppRouter = typeof appRouter;
